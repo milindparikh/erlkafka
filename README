@@ -1,0 +1,35 @@
+erlkafka is a kafka client written in erlang. 
+
+erlkafka provides seven core functions 
+
+    produce                        %% native kafka produce request
+    multi_produce                  %% native kafka multi_produce request
+    fetch                          %% native kafka fetch request
+    multi_fetch			   %% native kafka multi_fetch request
+    offset 			   %% native kafka offset request
+    get_list_of_brokers            %% conditional zookeeper dependent list of brokers
+    get_list_of_broker_partitions  %% conditional zookeeper dependent list of broker partitions
+                                   %% for a topic
+
+erlkafka is available under two different licenses. LGPL or the BSD license.
+erlkafka current verion : 0.5.0
+
+It requires ezk (https://github.com/infinipool/ezk.git) for auto discovery.
+
+   {enable_kafka_autodiscovery, true} in erlkafka_app.app is the switch to 
+   turn auto discovery on.
+
+
+   if {enable_kafka_autodiscovery, false) then 
+         application:start(erlkafka_app)   is sufficient 
+
+   if {enable_kafka_autodiscovery, true) then 
+         application:start(ezk)            
+         application:start(erlkafka_app)   is required 
+
+
+         
+
+
+
+
