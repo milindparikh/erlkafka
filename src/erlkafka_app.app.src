@@ -1,13 +1,23 @@
 {application, erlkafka_app,
-   [{vsn, "0.5.0"}, 
+   [{vsn, "0.6.0"}, 
     {modules, [
                erlkafka_app,
-               erlkafka_root_sup,
-               kafka_server_sup,  
-	       kafka_server,
-               kafka_simple_api, kafka_protocol
+	       erlkafka,
+%----------------------------------------------------------------
+%                      Supervisor Hiearchy 
+%----------------------------------------------------------------
+               erlkafka_root_sup,                       % RootSup
+                  kafka_server_sup,  			% ServerSup
+		        kafka_server,   	 	  
+		  kafka_stream_consumer_sup,		% ConsumerSup
+			kafka_sequential_reader,
+                        kafka_stream_consumer,
+%----------------------------------------------------------------
+%                      Library Modules 
+%----------------------------------------------------------------
+               kafka_simple_api, kafka_protocol,
+	       uuid
                 ]}, 
-
     {registered, [erlkafka_app]}, 
     {mod, {erlkafka_app, []}}, 
     {applications, [kernel, stdlib]}, 

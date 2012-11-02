@@ -23,7 +23,7 @@
 produce(Broker, Topic, Partition, Messages) -> 
    Req = kafka_protocol:produce_request (Topic, Partition, Messages),
    call({Broker, request, Req}).  % a produce in Kafka 0.7 has no response
-    
+     
 multi_produce(Broker, TopicPartitionMessages) -> 
    Req = kafka_protocol:multi_produce_request(TopicPartitionMessages),
    call({Broker, request, Req}). % a produce in Kafka 0.7 has no response
@@ -41,10 +41,20 @@ offset(Broker, Topic, Partition, Time, MaxNumberOfOffsets) ->
    call({Broker, request_with_response_offset, Req}).
 
 get_list_of_brokers() ->
-   kafka_protocol:get_list_of_brokers().
+   
+   kafka_protocol:get_list_of_brokers(
+	application:get_env(erlkafka_app, enable_autodiscovery),   
+	application:get_env(erlkafka_app, kafka_brokers),
+	application:get_env(erlkafka_app, kafka_prefix)
+   ).
 
 get_list_of_broker_partitions(Topic) -> 
-   kafka_protocol:get_list_of_broker_partitions(Topic).
+   kafka_protocol:get_list_of_broker_partitions(
+	application:get_env(erlkafka_app, enable_autodiscovery),   
+	application:get_env(erlkafka_app, kafka_brokers),
+	application:get_env(erlkafka_app, kafka_prefix),
+	Topic
+   ).
 
 %%%-------------------------------------------------------------------
 %%%                         INTERNAL FUNCTIONS
