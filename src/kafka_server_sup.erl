@@ -24,27 +24,8 @@
 %%%-------------------------------------------------------------------
 
 
-start_link() -> 
-
-   case application:get_env(erlkafka_app,enable_kafka_autodiscovery)  of 
-       undefined -> 
-       	          start_link([{0, '127.0.0.1', 9092}]);
-       {ok, false} -> 
-              case application:get_env(erlkafka_app,kafka_brokers) of 
-                   undefined ->
-                           % This is default and if it does not work, 
-         		   % change the application env
-
-      	                   start_link([{0, '127.0.0.1', 9092}]);
-                   {ok, Brokers} -> 
-                           start_link(Brokers)
-              end;
-       {ok,true}  -> 
-              start_link(kafka_protocol:get_dynamic_list_of_brokers())
-    end.
-
-        
-	 
+start_link() ->
+  start_link(kafka_protocol:get_list_of_brokers()).
 
 
 start_link(Params) ->
@@ -53,17 +34,17 @@ start_link(Params) ->
 			  ?MODULE, [Params]).
 
 
-get_random_broker_instance_from_pool(Broker) -> 
-    BrokerPoolCount = param("BrokerPoolCount", ?DEFAULT_POOL_COUNT),	
+get_random_broker_instance_from_pool(Broker) ->
+    BrokerPoolCount = param("BrokerPoolCount", ?DEFAULT_POOL_COUNT),
     Pids = get_ids(),
     BrokerInstance = Broker*BrokerPoolCount + random:uniform(BrokerPoolCount),
-     
-    lists:nth(1, 
-        lists:filter(fun ({_Child, Id} ) -> 
+
+    lists:nth(1,
+        lists:filter(fun ({_Child, Id} ) ->
         		     case Id =:=  BrokerInstance
-                               of true -> true; 
-	            		  false-> false  
-		             end 
+                               of true -> true;
+	            		  false-> false
+		             end
 		     end,
 		     Pids)).
 
@@ -85,22 +66,22 @@ get_ids() ->
 
 
 
-init([Params]) -> 
+init([Params]) ->
   BrokerPoolCount = param(broker_pool_count, ?DEFAULT_POOL_COUNT),
   RestartStrategy = {one_for_one, 0, 1},
-  Children = 
+  Children =
    lists:flatten(
-    lists:map( fun ({Broker, Host, Port}) -> 
-                      lists:map(fun (X) -> {Broker*BrokerPoolCount + X, 
+    lists:map( fun ({Broker, Host, Port}) ->
+                      lists:map(fun (X) -> {Broker*BrokerPoolCount + X,
                                               {kafka_server, start_link, [[Host, Port]]},
 					      transient,
 					      brutal_kill,
 					      worker,
 					      [kafka_server]
-                                           } 
-                                end, 
+                                           }
+                                end,
                                 lists:seq(1, BrokerPoolCount))
-		   end, 
+		   end,
 		   Params)
  ),
 
